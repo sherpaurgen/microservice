@@ -13,7 +13,7 @@ type Logging struct {
 }
 
 func NewLogger(l *log.Logger) *Logging {
-	return &Logging{}
+	return &Logging{l}
 }
 
 func (lg *Logging) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
