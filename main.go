@@ -15,9 +15,10 @@ import (
 func main() {
 	l := log.New(os.Stdout, "productapi-log", log.LstdFlags)
 	hh := handlers.NewLogger(l)
-
+	gg := handlers.NewGG(l)
 	servemux := http.NewServeMux()
 	servemux.Handle("/", hh)
+	servemux.Handle("/about", gg)
 	webserver := &http.Server{
 		Addr:         ":8080",
 		Handler:      servemux,
@@ -34,9 +35,9 @@ func main() {
 		}
 	}()
 
-	sigChan := make(chan os.Signal)
-	signal.Notify(sigChan, os.Interrupt)
-	signal.Notify(sigChan, os.Kill)
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, os.Interrupt, os.Kill)
+	//signal.Notify(sigChan, os.Kill)
 	sig := <-sigChan //this is blocking operation --reading from channel
 	l.Println("Received terminate graceful shutdown", sig)
 	d := time.Now().Add(30 * time.Second)
