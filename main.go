@@ -14,11 +14,12 @@ import (
 
 func main() {
 	l := log.New(os.Stdout, "productapi-log", log.LstdFlags)
-	hh := handlers.NewLogger(l)
-	gg := handlers.NewGG(l)
+	// hh := handlers.NewLogger(l)
+	// gg := handlers.NewGG(l)
+	ph := handlers.NewProducts(l)
 	servemux := http.NewServeMux()
-	servemux.Handle("/", hh)
-	servemux.Handle("/about", gg)
+	servemux.Handle("/", ph)
+	// servemux.Handle("/about", gg)
 	webserver := &http.Server{
 		Addr:         ":8080",
 		Handler:      servemux,
@@ -41,7 +42,10 @@ func main() {
 	sig := <-sigChan //this is blocking operation --reading from channel
 	l.Println("Received terminate graceful shutdown", sig)
 	d := time.Now().Add(30 * time.Second)
-	tc, _ := context.WithDeadline(context.Background(), d)
+	// Create a context with the calculated deadline
+	//context.Background() returns the base context that is empty (its like blank canvas /template) and its passed to context.WithDeadline
+	tc, cancel := context.WithDeadline(context.Background(), d)
+	defer cancel()
 	webserver.Shutdown(tc)
 
 }
