@@ -1,6 +1,10 @@
 package data
 
-import "time"
+import (
+	"encoding/json"
+	"io"
+	"time"
+)
 
 type Product struct {
 	ID          int     `json:"id"`   //this is called struct tag or field tags
@@ -11,6 +15,17 @@ type Product struct {
 	CreatedOn   string  `json:"-"` // omit this completely on output
 	UpdatedOn   string  `json:"-"`
 	DeletedOn   string  `json:"-"`
+}
+
+type Products []*Product
+
+func (p *Products) ToJSON(rw io.Writer) error {
+	e := json.NewEncoder(rw) //returns new eoncoder
+	return e.Encode(p)       //this will encode , if not it will return errror
+}
+
+func GetProducts() Products {
+	return productList
 }
 
 var productList = []*Product{
@@ -32,8 +47,4 @@ var productList = []*Product{
 		CreatedOn:   time.Now().UTC().String(),
 		UpdatedOn:   time.Now().UTC().String(),
 	},
-}
-
-func GetProducts() []*Product {
-	return productList
 }
