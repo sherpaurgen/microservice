@@ -16,7 +16,7 @@ func main() {
 	l := log.New(os.Stdout, "productapi-log", log.LstdFlags)
 	// hh := handlers.NewLogger(l)
 	// gg := handlers.NewGG(l)
-	ph := handlers.NewProducts(l)
+	ph := handlers.NewProducts(l) //a product handler
 	servemux := http.NewServeMux()
 	servemux.Handle("/", ph)
 	// servemux.Handle("/about", gg)
