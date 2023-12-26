@@ -19,13 +19,29 @@ type Product struct {
 
 type Products []*Product
 
+// notice that its for array "[]*Product"
 func (p *Products) ToJSON(rw io.Writer) error {
 	e := json.NewEncoder(rw) //returns new eoncoder
 	return e.Encode(p)       //this will encode , if not it will return errror
 }
 
+// method for "Product" notice that its singluar product
+func (p *Product) FromJson(r io.Reader) error {
+	e := json.NewDecoder(r)
+	return e.Decode(p)
+}
+
 func GetProducts() Products {
 	return productList
+}
+
+func AddProduct(p *Product) {
+	p.ID = getNextID()
+	productList = append(productList, p)
+}
+func getNextID() int {
+	lastproduct := productList[len(productList)-1]
+	return lastproduct.ID + 1
 }
 
 var productList = []*Product{
