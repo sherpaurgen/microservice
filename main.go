@@ -9,6 +9,8 @@ import (
 	"os/signal"
 	"time"
 
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 	"github.com/sherpaurgen/microservice/handlers"
 )
 
@@ -17,8 +19,18 @@ func main() {
 	// hh := handlers.NewLogger(l)
 	// gg := handlers.NewGG(l)
 	ph := handlers.NewProducts(l) //a product handler
-	servemux := http.NewServeMux()
-	servemux.Handle("/", ph)
+
+	//servemux := http.NewServeMux()
+	servemux := chi.NewRouter()
+	servemux.Use(middleware.Logger)
+	servemux.Get("/", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("hello world!"))
+	})
+	apiRouter := chi.NewRouter()
+	apiRouter.Get("/items", ph.GetProducts)
+	servemux.Mount("/api", apiRouter)
+	//with above it will work for 127.0.0.1:8080/api/items , it will NOT work for 127.0.0.1:8080/api/items/ , notice trailing slash
+
 	// servemux.Handle("/about", gg)
 	webserver := &http.Server{
 		Addr:         ":8080",
