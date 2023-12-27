@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"encoding/json"
 	"log"
 	"net/http"
 	"regexp"
@@ -49,12 +48,13 @@ func (p *Products) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 		}
 		rw.Header().Set("Content-Type", "application/json")
 		rw.WriteHeader(http.StatusOK)
-		m := make(map[string]string)
-		m["id"] = idString
+		// m := make(map[string]string)
+		// m["id"] = idString
 
-		reply, err := json.Marshal(m)
-		rw.Write(reply)
-		p.l.Println("Got id - ", id)
+		// reply, err := json.Marshal(m)
+		// rw.Write(reply)
+		// p.l.Println("Got id - ", id)
+		p.updateProduct(id, rw, r)
 		return
 
 	}

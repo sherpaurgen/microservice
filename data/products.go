@@ -45,12 +45,13 @@ func getNextID() int {
 	return lastproduct.ID + 1
 }
 func UpdateProduct(id int, p *Product) error {
-	fp, position, err := findProduct(id)
+	_, position, err := findProduct(id)
 	if err != nil {
 		return err
 	}
 	p.ID = id
-	productList[position] = fp
+	productList[position] = p
+
 	return nil
 }
 
