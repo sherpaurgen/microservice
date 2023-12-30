@@ -1,9 +1,12 @@
 package handlers
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
+	"strconv"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/sherpaurgen/microservice/data"
 )
 
@@ -31,19 +34,30 @@ func (p *Products) AddProduct(rw http.ResponseWriter, r *http.Request) {
 	prod := &data.Product{}
 	err := prod.FromJson(r.Body)
 	if err != nil {
-		http.Error(rw, "Unable to unmarshal json", http.StatusBadRequest)
+		http.Error(rw, "Failed to unmarshal JSON to product data", http.StatusBadRequest)
 	}
 	data.AddProduct(prod)
 	p.l.Printf("Prod: %v", prod)
 }
 
-func (p Products) UpdateProduct(id int, rw http.ResponseWriter, r *http.Request) {
-	prod := &data.Product{}
-	err := prod.FromJson(r.Body)
+func (p Products) UpdateProduct(rw http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(chi.URLParam(r, "productid"))
 	if err != nil {
-		http.Error(rw, "unable to unmarshall", http.StatusBadRequest)
+		http.Error(rw, "Invalid url in put request", http.StatusBadRequest)
 	}
-	err = data.UpdateProduct(id, prod)
+	prod := &data.Product{}
+	err = prod.FromJson(r.Body)
+	if err != nil {
+		http.Error(rw, "Failed to unmarshal JSON to product data: UpdateProduct", http.StatusBadRequest)
+	}
+	status, err := data.UpdateProduct(id, prod)
+	if status {
+		rw.Header().Add("Content-Type", "application/json")
+		rw.WriteHeader(http.StatusOK)
+		jsonData := map[string]string{"response": "update successful"}
+		jsonResponse, _ := json.Marshal(jsonData)
+		rw.Write(jsonResponse)
+	}
 	if err == data.ErrProductNotFound {
 		http.Error(rw, "Product not found", http.StatusNotFound)
 		return

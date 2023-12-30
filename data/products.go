@@ -44,15 +44,14 @@ func getNextID() int {
 	lastproduct := productList[len(productList)-1]
 	return lastproduct.ID + 1
 }
-func UpdateProduct(id int, p *Product) error {
+func UpdateProduct(id int, p *Product) (bool, error) {
 	_, position, err := findProduct(id)
 	if err != nil {
-		return err
+		return false, err
 	}
 	p.ID = id
 	productList[position] = p
-
-	return nil
+	return true, nil
 }
 
 var ErrProductNotFound = fmt.Errorf("product not found")

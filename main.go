@@ -16,8 +16,6 @@ import (
 
 func main() {
 	l := log.New(os.Stdout, "productapi-log", log.LstdFlags)
-	// hh := handlers.NewLogger(l)
-	// gg := handlers.NewGG(l)
 	ph := handlers.NewProducts(l) //a product handler
 
 	//servemux := http.NewServeMux()
@@ -27,9 +25,15 @@ func main() {
 		w.Write([]byte("hello world!"))
 	})
 	apiRouter := chi.NewRouter()
-	apiRouter.Get("/items", ph.GetProducts)
+	apiRouter.Get("/products", ph.GetProducts)
+	apiRouter.Put("/products/{productid}", ph.UpdateProduct)
+	apiRouter.Post("/products", ph.AddProduct)
+
 	servemux.Mount("/api", apiRouter)
 	//with above it will work for 127.0.0.1:8080/api/items , it will NOT work for 127.0.0.1:8080/api/items/ , notice trailing slash
+	servemux.Get("/", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("hello world!"))
+	})
 
 	// servemux.Handle("/about", gg)
 	webserver := &http.Server{
