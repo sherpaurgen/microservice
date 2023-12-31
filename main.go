@@ -20,13 +20,17 @@ func main() {
 
 	//servemux := http.NewServeMux()
 	servemux := chi.NewRouter()
+
 	servemux.Use(middleware.Logger)
 	servemux.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("hello world!"))
 	})
 	apiRouter := chi.NewRouter()
+	apiRouter.Use(ph.MiddlewareProductValidation)
 	apiRouter.Get("/products", ph.GetProducts)
+
 	apiRouter.Put("/products/{productid}", ph.UpdateProduct)
+
 	apiRouter.Post("/products", ph.AddProduct)
 
 	servemux.Mount("/api", apiRouter)

@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -16,6 +17,9 @@ type Products struct {
 
 func NewProducts(l *log.Logger) *Products {
 	return &Products{l}
+	//its constructor for Products structor for example
+	// if there is struct type person struct { name string age  int }
+	//then a new person will be s := person{name: "Sean", age: 50} or person{"Sean",50}
 }
 
 func (p *Products) GetProducts(rw http.ResponseWriter, r *http.Request) {
@@ -31,26 +35,25 @@ func (p *Products) GetProducts(rw http.ResponseWriter, r *http.Request) {
 }
 func (p *Products) AddProduct(rw http.ResponseWriter, r *http.Request) {
 	p.l.Println("Handle post product")
-	prod := &data.Product{}
+	// prod := &data.Product{}
+	prod := r.Context().Value(KeyProduct{}).(data.Product)
 	err := prod.FromJson(r.Body)
 	if err != nil {
 		http.Error(rw, "Failed to unmarshal JSON to product data", http.StatusBadRequest)
 	}
-	data.AddProduct(prod)
+	data.AddProduct(&prod)
 	p.l.Printf("Prod: %v", prod)
 }
 
 func (p Products) UpdateProduct(rw http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(chi.URLParam(r, "productid"))
+	id, err := strconv.Atoi(chi.URLParam(r, "productid")) //extract product id from url
 	if err != nil {
 		http.Error(rw, "Invalid url in put request", http.StatusBadRequest)
 	}
-	prod := &data.Product{}
-	err = prod.FromJson(r.Body)
-	if err != nil {
-		http.Error(rw, "Failed to unmarshal JSON to product data: UpdateProduct", http.StatusBadRequest)
-	}
-	status, err := data.UpdateProduct(id, prod)
+
+	prod := r.Context().Value(KeyProduct{}).(data.Product)
+
+	status, err := data.UpdateProduct(id, &prod)
 	if status {
 		rw.Header().Add("Content-Type", "application/json")
 		rw.WriteHeader(http.StatusOK)
@@ -66,4 +69,26 @@ func (p Products) UpdateProduct(rw http.ResponseWriter, r *http.Request) {
 		http.Error(rw, "Product not found", http.StatusBadRequest)
 		return
 	}
+}
+
+type KeyProduct struct{}
+
+func (p Products) MiddlewareProductValidation(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+
+		prod := data.Product{}
+
+		err := prod.FromJson(r.Body) //gets httpbody + encode and save to prod
+
+		p.l.Printf("problem body %v", prod)
+
+		if err != nil {
+			p.l.Printf("problem body %v", r.Body)
+			http.Error(rw, "Failed to unmarshal JSON to product data: UpdateProduct", http.StatusBadRequest)
+
+		}
+		ctx := context.WithValue(r.Context(), KeyProduct{}, prod)
+		r = r.WithContext(ctx) //adding the updated context to request
+		next.ServeHTTP(rw, r)
+	})
 }
