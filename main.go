@@ -26,12 +26,12 @@ func main() {
 		w.Write([]byte("hello world!"))
 	})
 	apiRouter := chi.NewRouter()
-	apiRouter.Use(ph.MiddlewareProductValidation)
+	//apiRouter.Use(ph.MiddlewareProductValidation)
 	apiRouter.Get("/products", ph.GetProducts)
 
-	apiRouter.Put("/products/{productid}", ph.UpdateProduct)
+	apiRouter.With(ph.MiddlewareProductValidation).Put("/products/{productid}", ph.UpdateProduct)
 
-	apiRouter.Post("/products", ph.AddProduct)
+	apiRouter.With(ph.MiddlewareProductValidation).Post("/products", ph.AddProduct)
 
 	servemux.Mount("/api", apiRouter)
 	//with above it will work for 127.0.0.1:8080/api/items , it will NOT work for 127.0.0.1:8080/api/items/ , notice trailing slash

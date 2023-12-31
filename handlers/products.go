@@ -76,12 +76,10 @@ type KeyProduct struct{}
 func (p Products) MiddlewareProductValidation(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 
-		prod := data.Product{}
+		prod := data.Product{} //create the product obj
 
-		err := prod.FromJson(r.Body) //gets httpbody + encode and save to prod
-
+		err := prod.FromJson(r.Body) //gets httpbody + json-encode and save to prod
 		p.l.Printf("problem body %v", prod)
-
 		if err != nil {
 			p.l.Printf("problem body %v", r.Body)
 			http.Error(rw, "Failed to unmarshal JSON to product data: UpdateProduct", http.StatusBadRequest)
