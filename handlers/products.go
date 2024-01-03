@@ -37,11 +37,8 @@ func (p *Products) GetProducts(rw http.ResponseWriter, r *http.Request) {
 func (p *Products) AddProduct(rw http.ResponseWriter, r *http.Request) {
 	p.l.Println("Handle post product")
 	// prod := &data.Product{}
+	//we get the data below from context processed by middleware
 	prod := r.Context().Value(KeyProduct{}).(data.Product)
-	err := prod.FromJson(r.Body)
-	if err != nil {
-		http.Error(rw, "Failed to unmarshal JSON to product data", http.StatusBadRequest)
-	}
 	data.AddProduct(&prod)
 	p.l.Printf("Prod: %v", prod)
 }
@@ -83,7 +80,7 @@ func (p Products) MiddlewareProductValidation(next http.Handler) http.Handler {
 		p.l.Printf("problem body %v", prod)
 		if err != nil {
 			p.l.Printf("problem body %v", r.Body)
-			http.Error(rw, "Failed to unmarshal JSON to product data: UpdateProduct", http.StatusBadRequest)
+			http.Error(rw, fmt.Sprintf("UpdateProduct: Failed to unmarshal JSON to product data: %v", err), http.StatusBadRequest)
 
 		}
 		//validate the product
