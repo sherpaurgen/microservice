@@ -10,18 +10,17 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
 	"github.com/sherpaurgen/microservice/handlers"
 )
 
 func main() {
-	l := log.New(os.Stdout, "productapi-log", log.LstdFlags)
+	l := log.New(os.Stdout, "Productapi-Log", log.LstdFlags)
 	ph := handlers.NewProducts(l) //a product handler
 
 	//servemux := http.NewServeMux()
 	servemux := chi.NewRouter()
 
-	servemux.Use(middleware.Logger)
+	// servemux.Use(middleware.Logger)
 	servemux.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("hello world!"))
 	})

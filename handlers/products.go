@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -16,8 +17,8 @@ type Products struct {
 }
 
 func NewProducts(l *log.Logger) *Products {
-	return &Products{l}
-	//its constructor for Products structor for example
+	return &Products{l} //return pointer for new Products object
+	//its constructor for Products struct for example
 	// if there is struct type person struct { name string age  int }
 	//then a new person will be s := person{name: "Sean", age: 50} or person{"Sean",50}
 }
@@ -85,6 +86,13 @@ func (p Products) MiddlewareProductValidation(next http.Handler) http.Handler {
 			http.Error(rw, "Failed to unmarshal JSON to product data: UpdateProduct", http.StatusBadRequest)
 
 		}
+		//validate the product
+		err = prod.Validate()
+		if err != nil {
+			p.l.Printf("[Error] validating product %v", err)
+			http.Error(rw, fmt.Sprintf("[Error] validating product: %s", err), http.StatusBadRequest)
+		}
+		//adding product to context
 		ctx := context.WithValue(r.Context(), KeyProduct{}, prod)
 		r = r.WithContext(ctx) //adding the updated context to request
 		next.ServeHTTP(rw, r)
