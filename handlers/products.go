@@ -69,6 +69,7 @@ func (p Products) UpdateProduct(rw http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// ///////////////////////      Middlewares
 type KeyProduct struct{}
 
 func (p Products) MiddlewareProductValidation(next http.Handler) http.Handler {
@@ -80,7 +81,7 @@ func (p Products) MiddlewareProductValidation(next http.Handler) http.Handler {
 		p.l.Printf("problem body %v", prod)
 		if err != nil {
 			p.l.Printf("problem body %v", r.Body)
-			http.Error(rw, fmt.Sprintf("UpdateProduct: Failed to unmarshal JSON to product data: %v", err), http.StatusBadRequest)
+			http.Error(rw, fmt.Sprintf("MiddlewareProductValidation: Failed to unmarshal JSON to product data: %v", err), http.StatusBadRequest)
 
 		}
 		//validate the product
