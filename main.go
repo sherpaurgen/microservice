@@ -27,16 +27,16 @@ func main() {
 	})
 	apiRouter := chi.NewRouter()
 	//apiRouter.Use(ph.MiddlewareProductValidation)
-	apiRouter.Use(cors.Handler(cors.Options{
-		// AllowedOrigins:   []string{"https://foo.com"}, // Use this to allow specific origin hosts
-		AllowedOrigins: []string{"https://127.0.0.1:8080", "http://127.0.0.1:8080"},
-		// AllowOriginFunc:  func(r *http.Request, origin string) bool { return true },
+	corsHandler := cors.Handler(cors.Options{
+		AllowedOrigins:   []string{"http://localhost:8080"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
 		ExposedHeaders:   []string{"Link"},
 		AllowCredentials: false,
-		MaxAge:           300, // Maximum value not ignored by any of major browsers
-	}))
+		MaxAge:           300, // Maximum value not ignored by any of the major browsers
+	})
+
+	apiRouter.Use(corsHandler)
 	apiRouter.Get("/products", ph.GetProducts)
 
 	apiRouter.With(ph.MiddlewareProductValidation).Put("/products/{productid}", ph.UpdateProduct)
